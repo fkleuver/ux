@@ -7,6 +7,7 @@ const files = [
     { pattern: "node_modules/requirejs/require.js", instrument: false },
     { pattern: "typings/**/*.d.ts", load: false, instrument: false },
     { pattern: "src/**/*.html", load: false },
+    { pattern: "src/**/*.css", load: false },
     { pattern: "src/**/*.ts", load: false },
     { pattern: "!src/**/*.spec.ts", load: false },
     { pattern: "test/setup.ts", load: false }
