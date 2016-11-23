@@ -1,4 +1,7 @@
 {
   "name": "aurelia-ux",
-  "main": "dist/amd/aurelia-ux.d.ts"
+  "main": "dist/amd/aurelia-ux.d.ts",
+  "globalDevDependencies": {
+    "jasmine": "registry:dt/jasmine#2.5.0+20161025102649"
+  }
 }
