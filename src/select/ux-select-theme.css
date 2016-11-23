@@ -1,0 +1,6 @@
+styles.select {
+  display: inline-block;
+  border: 0;
+  outline: none;
+  position: relative;
+}

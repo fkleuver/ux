@@ -1,5 +1,7 @@
 <template role="listbox">
-    <select ref="select" value.two-way="value">
+    <require from="./ux-select-theme"></require>
+
+    <select ref="select" styles.select value.two-way="value">
         <option model.bind="null"></option>
         <option repeat.for="option of options" model.bind="option.value">
             ${option.text}
