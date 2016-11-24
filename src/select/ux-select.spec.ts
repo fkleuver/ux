@@ -22,7 +22,6 @@ const resources = [
     'src/select/ux-select'
 ];
 
-
 function arrange(bindingContext: BindingContext, bind: boolean, attach: boolean): Promise<TComponentTester<UxSelect>> {
     return Promise
         .resolve(StageComponent
@@ -178,5 +177,41 @@ describe('ux-select', () => {
             assertViewCorrect(component.viewModel, bindingContext, true);
         });
     });
-});
 
+    describe('style', () => {
+        let bindingContext: BindingContext;
+        let component: TComponentTester<UxSelect>;
+
+        beforeEach((done) => {
+            bindingContext = <any>{};
+            bindingContext.options = [
+                'Option 1',
+                'Option 2',
+                'Option 3'
+            ];
+            bindingContext.value = bindingContext.options[1];
+
+            arrange(bindingContext, true, true)
+                .then((c) => {
+                    component = c;
+                    done();
+                });
+        });
+
+        it('is injected into the document head', () => {
+            let styles = Array
+                .from(document.head.querySelectorAll('style'))
+                .filter((x) => x.innerHTML.indexOf('select_au_ux') > -1);
+
+            expect(styles.length).toBe(1);
+            expect(styles[0].innerHTML).toContain('select_wrapper_au_ux_1');
+            expect(styles[0].innerHTML).toContain('select_au_ux_2');
+        });
+
+        it('is added to the select element\'s classList', () => {
+            let selectElement = <HTMLSelectElement>component.viewModel['selectElement'];
+
+            expect(selectElement.classList).toContain('select_au_ux_2');
+        });
+    });
+});

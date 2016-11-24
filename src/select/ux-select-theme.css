@@ -1,6 +1,33 @@
-styles.select {
-  display: inline-block;
-  border: 0;
-  outline: none;
+styles.select-wrapper {
   position: relative;
+}
+
+styles.select {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #f2f2f2;
+  border-radius: 2px;
+  height: 3rem;
+
+  background-color: ${background};
+}
+
+styles.select.disabled {
+  color: rgba(0,0,0,.3);
+}
+
+styles.select:focus {
+  outline: 1px solid ${focus};
+}
+
+styles.option {
+
+}
+
+styles.ul {
+
+}
+
+styles.li {
+
 }

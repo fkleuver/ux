@@ -1,13 +1,17 @@
 <template role="listbox">
     <require from="./ux-select-theme"></require>
 
-    <select if.bind="nativeMode" ref="selectElement" styles.select value.two-way="innerValue" matcher.bind="matcher">
+    <select if.bind="nativeMode" ref="selectElement" styles.select value.two-way="innerValue" matcher.bind="matcher" class="
+    ${disabled ? 'disabled' : ''}
+    ">
         <option styles.option repeat.for="option of innerOptions" model.bind="valueProperty && option[valueProperty] ? option[valueProperty] : option">
             ${textProperty && option[textProperty] ? option[textProperty] : option}
         </option>
     </select>
 
-    <ul if.bind="!nativeMode" ref="ulElement" styles.ul value.two-way="innerValue" matcher.bind="matcher">
+    <ul if.bind="!nativeMode" ref="ulElement" styles.ul value.two-way="innerValue" matcher.bind="matcher" class="
+    ${disabled ? 'disabled' : ''}
+    ">
         <li styles.li repeat.for="option of innerOptions" model.bind="valueProperty && option[valueProperty] ? option[valueProperty] : option">
             ${textProperty && option[textProperty] ? option[textProperty] : option}
         </li>
