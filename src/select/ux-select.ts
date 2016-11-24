@@ -18,6 +18,9 @@ export class UxSelect implements Themable {
         }
     }
 
+    @bindable({ defaultBindingMode: bindingMode.oneTime, defaultValue: true })
+    public nativeMode: boolean;
+
     @bindable({ defaultBindingMode: bindingMode.oneTime })
     public matcher: (a: any, b: any) => boolean = this.defaultMatcher;
 
@@ -36,7 +39,11 @@ export class UxSelect implements Themable {
     @bindable({ defaultBindingMode: bindingMode.twoWay })
     public value: any = null;
 
+    @bindable({ defaultBindingMode: bindingMode.oneWay })
+    public disabled: boolean = false;
+
     public view: View;
+    private ulElement: HTMLUListElement;
     private selectElement: HTMLSelectElement;
     private isAttached: boolean = false;
     private innerOptions: any[] = [];
