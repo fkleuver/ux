@@ -41,10 +41,13 @@ export class UxSelect implements Themable {
 
     @bindable({ defaultBindingMode: bindingMode.oneWay })
     public disabled: boolean = false;
-
+    
+    public collapsed: boolean = false;
     public view: View;
     private ulElement: HTMLUListElement;
+    private inputElement: HTMLInputElement;
     private selectElement: HTMLSelectElement;
+    private itemTemplate: HTMLDivElement;
     private isAttached: boolean = false;
     private innerOptions: any[] = [];
     @observable private innerValue: any = null;
@@ -137,6 +140,18 @@ export class UxSelect implements Themable {
         if ((this.valueProperty ? this.value[this.valueProperty] : this.value) !== newValue) {
             this.value = newValue;
         }
+    }
+
+    public open(): void {
+        this.collapsed = false;
+    }
+
+    public close(): void {
+        this.collapsed = true;
+    }
+
+    public set(option: any): void {
+        this.innerValue = option;
     }
 
     private addOption(option: any): void {
