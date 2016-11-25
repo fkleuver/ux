@@ -50,8 +50,8 @@ styles.li {
     width: calc(100% - 90px);
 }
 
-.custom-select--collapsed {
-    display: none;
+.custom-select__items--collapsed {
+    display: none !important;
 }
 
 .custom-select__items {

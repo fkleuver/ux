@@ -1,11 +1,14 @@
 import { customElement, bindable, ViewResources, View, processAttributes } from 'aurelia-templating';
 import { bindingMode, observable, BindingEngine, Disposable } from 'aurelia-binding';
 import { inject } from 'aurelia-dependency-injection';
+import {
+    TaskQueue
+} from 'aurelia-task-queue';
 import { StyleEngine } from '../styles/style-engine';
 import { Themable } from '../styles/themable';
 import { processDesignAttributes } from '../designs/design-attributes';
 
-@inject(ViewResources, StyleEngine, BindingEngine)
+@inject(ViewResources, StyleEngine, BindingEngine, TaskQueue)
 @customElement('ux-select')
 @processAttributes(processDesignAttributes)
 export class UxSelect implements Themable {
@@ -44,10 +47,11 @@ export class UxSelect implements Themable {
     
     public collapsed: boolean = false;
     public view: View;
-    private ulElement: HTMLUListElement;
-    private inputElement: HTMLInputElement;
-    private selectElement: HTMLSelectElement;
-    private itemTemplate: HTMLDivElement;
+    public ulElement: HTMLUListElement;
+    public inputElement: HTMLInputElement;
+    public selectElement: HTMLSelectElement;
+    public itemTemplate: HTMLDivElement;
+    public itemTemplateHTML: string;
     private isAttached: boolean = false;
     private innerOptions: any[] = [];
     @observable private innerValue: any = null;
@@ -56,7 +60,8 @@ export class UxSelect implements Themable {
     constructor(
         public resources: ViewResources,
         private styleEngine: StyleEngine,
-        private bindingEngine: BindingEngine) {
+        private bindingEngine: BindingEngine,
+        private tq: TaskQueue) {
 
     }
 
@@ -72,6 +77,10 @@ export class UxSelect implements Themable {
 
     public attached(): void {
         this.isAttached = true;
+
+        this.tq.queueMicroTask(() => {
+            this.itemTemplateHTML = this.itemTemplate.innerHTML;
+        });
     }
 
     public detached(): void {
@@ -137,7 +146,7 @@ export class UxSelect implements Themable {
     }
 
     protected innerValueChanged(newValue: any): void {
-        if ((this.valueProperty ? this.value[this.valueProperty] : this.value) !== newValue) {
+        if (this.value !== newValue) {
             this.value = newValue;
         }
     }
@@ -150,7 +159,11 @@ export class UxSelect implements Themable {
         this.collapsed = true;
     }
 
-    public set(option: any): void {
+    public toggle(): void {
+        this.collapsed = !this.collapsed;
+    }
+
+    public select(option: any): void {
         this.innerValue = option;
     }
 

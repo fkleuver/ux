@@ -3,7 +3,6 @@ import { StageComponent } from 'aurelia-testing';
 import { bootstrap } from 'aurelia-bootstrapper';
 import { UxSelect } from './ux-select';
 
-type Option = { text: string, value: any };
 type BindingContext = { options: any[], value: any, textProperty: string, valueProperty: string, theme: any };
 
 interface TComponentTester<T> {
@@ -59,7 +58,6 @@ function assertViewModelCorrect(uxSelect: UxSelect, bindingContext: BindingConte
 function assertViewCorrectNative(uxSelect: UxSelect, bindingContext: BindingContext, optionsAreWrapped: boolean): void {
     let selectElement = <HTMLSelectElement>uxSelect['selectElement'];
     if (optionsAreWrapped) {
-        let options = bindingContext.options;
         let selectedOption = bindingContext.options.find((x) => uxSelect['defaultMatcher'](x, bindingContext.value));
         expect(selectElement.value).toBe(selectedOption);
     } else {
@@ -79,7 +77,6 @@ function assertViewCorrectCustom(uxSelect: UxSelect, bindingContext: BindingCont
     let ulElement = <HTMLUListElement>uxSelect['ulElement'];
     let inputElement = <HTMLInputElement>uxSelect['inputElement'];
     if (optionsAreWrapped) {
-        let options = bindingContext.options;
         let selectedOption = bindingContext.options.find((x) => uxSelect['defaultMatcher'](x, bindingContext.value));
         expect(inputElement.value).toBe(selectedOption);
     } else {
@@ -131,7 +128,7 @@ describe('ux-select', () => {
                 let sut: UxSelect;
 
                 it('throws', () => {
-                    sut = new UxSelect(<any>null, <any>null, <any>null);
+                    sut = new UxSelect(<any>null, <any>null, <any>null, <any>null);
                     let err: any;
                     try {
                         sut.optionsChanged(<any>5);

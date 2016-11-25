@@ -3,7 +3,7 @@ import { styles } from '../styles/decorators';
 @styles()
 export class UxSelectTheme {
     public background: string = 'rgba(255, 255, 255, 0.90)';
-    public focus: string;
+    public focus: string = '#f2f2f2';
 
     public inDuration = 300;
     public outDuration = 225;

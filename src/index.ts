@@ -9,7 +9,8 @@ export {UXConfiguration} from './ux-configuration';
 
 export function configure(config: FrameworkConfiguration, callback?: (config: AureliaUX) => Promise<any>) {
   config.globalResources([
-    './button/ux-button'
+    './button/ux-button',
+    './select/ux-select'
   ]);
 
   let ux = <AureliaUX>config.container.get(AureliaUX);
