@@ -6,7 +6,8 @@ export { AureliaUX } from './aurelia-ux';
 export { UXConfiguration } from './ux-configuration';
 export function configure(config, callback) {
     config.globalResources([
-        './button/ux-button'
+        './button/ux-button',
+        './select/ux-select'
     ]);
     var ux = config.container.get(AureliaUX);
     if (typeof callback === 'function') {

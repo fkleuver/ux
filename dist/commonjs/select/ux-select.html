@@ -1,0 +1,58 @@
+<template styles.select-wrapper blur.trigger="selectBlur()">
+    <require from="./ux-select-theme"></require>
+    <require from="./ux-option"></require>
+    <require from="./select-property"></require>
+
+    <select styles.select-native
+            class="${disabled ? 'disabled' : ''}"
+            show.bind="nativeMode"
+            ref="selectElement"
+            value.two-way="innerValue"
+            matcher.bind="matcher">
+
+        <option styles.option
+                repeat.for="option of innerOptions"
+                model.bind="option">
+            ${option | selectProperty:textProperty}
+        </option>
+    </select>
+
+    <div if.bind="!nativeMode"
+         styles.select-custom__selected-option
+         click.trigger="inputClick()"
+
+         role="combobox"
+         aria-controls.one-time="'ux-select-' + id + '-options'"
+         aria-expanded.bind="expanded">
+
+        <label styles.select-custom__selected-option__label>
+            ${innerValue | selectProperty:textProperty}
+        </label>
+
+        <div styles.select-custom__selected-option__caret>
+            <div class="caret"></div>
+        </div>
+    </div>
+
+    <ul if.bind="!nativeMode"
+        styles.select-custom__options
+        show.bind="expanded"
+        id.one-time="'ux-select-' + id + '-options'"
+        ref="ulElement"
+
+        role="listbox">
+
+        <ux-option  repeat.for="option of innerOptions"
+                    option.bind="option"
+                    id.one-time="'ux-select-' + id + '-option-' + $index"
+                    selected.bind="index === $index"
+                    click.delegate="select(option)"
+
+                    role="option">
+        </ux-option>
+    </ul>
+
+    <div ref="itemTemplate" show.bind=false>
+        <slot></slot>
+    </div>
+</template>

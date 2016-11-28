@@ -1,0 +1,16 @@
+<template>
+    <ux-select options.bind="products" value.bind="selectedProduct" text-property="name">
+    </ux-select>
+    
+    <ux-select options.bind="products" value.bind="selectedProduct" text-property="name">
+        <li class="myClass">
+            <span>Product Name: ${option.name}</span>
+        </li>
+    </ux-select>
+    
+    <ux-select options.bind="products" value.bind="selectedProduct">
+        <ux-option option.bind="option">
+
+        </ux-option>
+    </ux-select>
+</template>

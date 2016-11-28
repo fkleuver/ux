@@ -1,0 +1,12 @@
+<template>
+    <require from="./ux-select-theme"></require>
+    <require from="./select-property"></require>
+    <slot>
+        <li 
+            if.bind="!html" 
+            styles.select-custom__option
+            class="${selected ? 'selected' : ''}">
+            ${option | selectProperty:textProperty}
+        </li>
+    </slot>
+</template>

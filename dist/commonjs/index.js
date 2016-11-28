@@ -14,7 +14,8 @@ var ux_configuration_1 = require('./ux-configuration');
 exports.UXConfiguration = ux_configuration_1.UXConfiguration;
 function configure(config, callback) {
     config.globalResources([
-        './button/ux-button'
+        './button/ux-button',
+        './select/ux-select'
     ]);
     var ux = config.container.get(aurelia_ux_1.AureliaUX);
     if (typeof callback === 'function') {
