@@ -1,24 +1,23 @@
 import { customElement, bindable, ViewResources, View, processAttributes } from 'aurelia-templating';
 import { bindingMode, observable, BindingEngine, Disposable } from 'aurelia-binding';
 import { inject } from 'aurelia-dependency-injection';
-import {
-    TaskQueue
-} from 'aurelia-task-queue';
+import { DOM } from 'aurelia-pal';
 import { StyleEngine } from '../styles/style-engine';
 import { Themable } from '../styles/themable';
 import { processDesignAttributes } from '../designs/design-attributes';
+import { SelectProperty } from './select-property';
+import * as Types from './types';
 
-@inject(ViewResources, StyleEngine, BindingEngine, TaskQueue)
+let nextId = 0;
+
+@inject(DOM.Element, ViewResources, StyleEngine, BindingEngine)
 @customElement('ux-select')
 @processAttributes(processDesignAttributes)
 export class UxSelect implements Themable {
 
     private defaultMatcher = (a: any, b: any) => {
-        if (this.textProperty) {
-            return a[this.textProperty] === b[this.textProperty];
-        } else {
-            return a === b;
-        }
+        const convert = new SelectProperty();
+        return (convert.toView(a, this.textProperty) === convert.toView(b, this.textProperty));
     }
 
     @bindable({ defaultBindingMode: bindingMode.oneTime, defaultValue: true })
@@ -29,9 +28,6 @@ export class UxSelect implements Themable {
 
     @bindable({ defaultBindingMode: bindingMode.oneTime, defaultValue: 'text' })
     public textProperty: string;
-
-    @bindable({ defaultBindingMode: bindingMode.oneTime, defaultValue: null })
-    public valueProperty: string;
 
     @bindable({ defaultBindingMode: bindingMode.oneWay })
     public theme: any = null;
@@ -44,25 +40,29 @@ export class UxSelect implements Themable {
 
     @bindable({ defaultBindingMode: bindingMode.oneWay })
     public disabled: boolean = false;
-    
-    public collapsed: boolean = false;
+
+    @bindable({ defaultBindingMode: bindingMode.oneWay })
+    public stopPropagation: boolean = false;
+
+    public id: number = nextId++;
+    public index: number = -1;
+    public expanded: boolean = false;
     public view: View;
     public ulElement: HTMLUListElement;
-    public inputElement: HTMLInputElement;
     public selectElement: HTMLSelectElement;
     public itemTemplate: HTMLDivElement;
-    public itemTemplateHTML: string;
     private isAttached: boolean = false;
     private innerOptions: any[] = [];
     @observable private innerValue: any = null;
     private optionsCollectionSubscription: Disposable;
 
+    public element: HTMLElement;
     constructor(
+        element: Element,
         public resources: ViewResources,
         private styleEngine: StyleEngine,
-        private bindingEngine: BindingEngine,
-        private tq: TaskQueue) {
-
+        private bindingEngine: BindingEngine) {
+        this.element = <HTMLElement>element;
     }
 
     public created(_: any, myView: View): void {
@@ -77,10 +77,9 @@ export class UxSelect implements Themable {
 
     public attached(): void {
         this.isAttached = true;
-
-        this.tq.queueMicroTask(() => {
-            this.itemTemplateHTML = this.itemTemplate.innerHTML;
-        });
+        if (!this.nativeMode) {
+            this.element.setAttribute('tabindex', '0');
+        }
     }
 
     public detached(): void {
@@ -91,32 +90,32 @@ export class UxSelect implements Themable {
         this.innerOptions = [];
         this.innerValue = null;
 
-        if (this.optionsCollectionSubscription) {
+        if (!Types.isUndefinedOrNull(this.optionsCollectionSubscription)) {
             this.optionsCollectionSubscription.dispose();
             this.optionsCollectionSubscription = <any>null;
         }
     }
 
     public themeChanged(newValue: any): void {
-        if (newValue) {
+        if (!Types.isUndefinedOrNull(newValue)) {
             this.styleEngine.applyTheme(this, newValue);
         }
     }
 
     public optionsChanged(newValue: any[]): void {
-        if (this.optionsCollectionSubscription) {
+        if (!Types.isUndefinedOrNull(this.optionsCollectionSubscription)) {
             this.optionsCollectionSubscription.dispose();
             this.optionsCollectionSubscription = <any>null;
         }
 
         this.innerOptions = [];
 
-        if (!newValue) {
+        if (Types.isUndefinedOrNull(newValue)) {
             return;
         }
 
-        if (!isArray(newValue)) {
-            throw new Error('\'options\' must be an array');
+        if (!Types.isCollection(newValue)) {
+            throw new Error('\'options\' must be a collection type');
         }
 
         this.optionsCollectionSubscription = this.bindingEngine
@@ -146,31 +145,16 @@ export class UxSelect implements Themable {
     }
 
     protected innerValueChanged(newValue: any): void {
-        if (this.value !== newValue) {
+        if (this.isAttached && this.value !== newValue) {
             this.value = newValue;
         }
-    }
-
-    public open(): void {
-        this.collapsed = false;
-    }
-
-    public close(): void {
-        this.collapsed = true;
-    }
-
-    public toggle(): void {
-        this.collapsed = !this.collapsed;
-    }
-
-    public select(option: any): void {
-        this.innerValue = option;
+        let innerOption = this.innerOptions.find((x) => this.matcher(x, newValue));
+        this.index = this.innerOptions.indexOf(innerOption);
     }
 
     private addOption(option: any): void {
-        if (isSimpleType(option) && this.valueProperty) {
+        if (Types.isScalar(option)) {
             let wrappedOption: any = {};
-            wrappedOption[this.valueProperty] = option;
             wrappedOption[this.textProperty] = option.toString();
             this.innerOptions.push(wrappedOption);
         } else {
@@ -179,14 +163,23 @@ export class UxSelect implements Themable {
     }
 
     private removeOption(option: any): void {
-        let idx: number;
-        if (isSimpleType(option)) {
-            let wrappedOption = this.innerOptions.find((x) => x[this.valueProperty] === option);
-            idx = this.innerOptions.indexOf(wrappedOption);
-        } else {
-            idx = this.innerOptions.indexOf(option);
-        }
+        let innerOption = this.innerOptions.find((x) => this.matcher(x, option));
+        let idx = this.innerOptions.indexOf(innerOption);
         this.innerOptions.splice(idx);
+    }
+
+    public select(option: any): void {
+        this.innerValue = option;
+        this.expanded = false;
+    }
+
+    protected inputClick() {
+        this.expanded = !this.expanded;
+        return !this.stopPropagation;
+    }
+
+    protected selectBlur() {
+        this.expanded = false;
     }
 }
 
@@ -194,18 +187,4 @@ interface ChangeRecords {
     addedCount: number;
     index: number;
     removed: any[];
-}
-
-function isSimpleType(value: any): boolean {
-    const type = Object.prototype.toString.call(value);
-    return type === '[object String]' ||
-        type === '[object Number]' ||
-        type === '[object Boolean]' ||
-        type === '[object Date]' ||
-        type === '[object RegExp]';
-}
-
-function isArray(value: any): boolean {
-    const type = Object.prototype.toString.call(value);
-    return type === '[object Array]';
 }

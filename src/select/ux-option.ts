@@ -8,17 +8,9 @@ import {
     ViewCompiler,
     processAttributes
 } from 'aurelia-templating';
-import {
-    bindingMode,
-    //createOverrideContext
-} from 'aurelia-binding';
-import {
-    TaskQueue
-} from 'aurelia-task-queue';
-import {
-    inject,
-    Container
-} from 'aurelia-dependency-injection';
+import { bindingMode } from 'aurelia-binding';
+import { TaskQueue } from 'aurelia-task-queue';
+import { inject, Container } from 'aurelia-dependency-injection';
 
 import { StyleEngine } from '../styles/style-engine';
 import { Themable } from '../styles/themable';
@@ -28,11 +20,13 @@ import { processDesignAttributes } from '../designs/design-attributes';
 @customElement('ux-option')
 @processAttributes(processDesignAttributes)
 export class UxOption implements Themable {
-    @bindable({ defaultBindingMode: bindingMode.oneTime, defaultValue: true })
-    public nativeMode: boolean;
     @bindable public theme: any = null;
-    @bindable public text: string = <any>null;
+    @bindable public option: string = <any>null;
     @bindable public html: string = <any>null;
+
+    @bindable({ defaultBindingMode: bindingMode.oneTime, defaultValue: 'text' })
+    public textProperty: string;
+    @bindable public selected: boolean = false;
 
     public view: View;
     private bindingContext: any;
@@ -58,7 +52,6 @@ export class UxOption implements Themable {
     public bind(bindingContext: any, overrideContext: any): void {
         this.bindingContext = bindingContext;
         this.overrideContext = overrideContext;
-        //this.overrideContext = createOverrideContext(this.bindingContext, overrideContext);
     }
 
     public attached(): void {
@@ -82,13 +75,6 @@ export class UxOption implements Themable {
         this.overrideContext = null;
     }
 
-    public select(option: any): void {
-        this.overrideContext
-            .parentOverrideContext
-            .bindingContext
-            .innerValue = option;
-    }
-
     public themeChanged(newValue: any): void {
         if (newValue) {
             this.styleEngine.applyTheme(this, newValue);
@@ -101,22 +87,18 @@ export class UxOption implements Themable {
                 this.apply();
             }
         } else {
+            // TODO: get the binding from UxSelect.innerTemplateHTML to UxOption.html to work and remove this
             let itemTemplate = this.overrideContext
                 .parentOverrideContext
                 .bindingContext
                 .itemTemplate;
 
-            if (itemTemplate.innerHTML) {
+            if (itemTemplate.innerHTML.trim() !== '<!--slot-->') {
                 this.html = itemTemplate.innerHTML;
             } else if (this.isApplied) {
                 this.disposeView();
+                this.html = <any>null;
             }
-        }
-    }
-
-    protected textChanged(newValue: string): void {
-        if (newValue && this.nativeMode) {
-            this.html = newValue;
         }
     }
 

@@ -1,57 +1,58 @@
-<template role="listbox" class="${!nativeMode ? 'custom-select' : ''}">
+<template styles.select-wrapper blur.trigger="selectBlur()">
     <require from="./ux-select-theme"></require>
     <require from="./ux-option"></require>
-    <require from="./select-from"></require>
+    <require from="./select-property"></require>
 
-    <select styles.select 
+    <select styles.select-native
+            class="${disabled ? 'disabled' : ''}"
             show.bind="nativeMode"
             ref="selectElement"
-            value.two-way="innerValue & selectFrom:innerValue:valueProperty"
-            matcher.bind="matcher"
-            class="${disabled ? 'disabled' : ''}">
+            value.two-way="innerValue"
+            matcher.bind="matcher">
 
         <option styles.option
                 repeat.for="option of innerOptions"
-                model.bind="option & selectFrom:option:valueProperty">
-
-            ${option & selectFrom:option:textProperty}
+                model.bind="option">
+            ${option | selectProperty:textProperty}
         </option>
     </select>
 
     <div if.bind="!nativeMode"
-         class="custom-select__current-item"
-         focus.trigger="open()"
-         blur.trigger="close()">
+         styles.select-custom__selected-option
+         click.trigger="inputClick()"
 
-        <input ref="inputElement"
-               type="text"
-               class="custom-select__input"
-               value.bind="innerValue & selectFrom:innerValue:textProperty"
-               readonly>
+         role="combobox"
+         aria-controls.one-time="'ux-select-' + id + '-options'"
+         aria-expanded.bind="expanded">
 
-        <div class="custom-select__caret">
+        <label styles.select-custom__selected-option__label>
+            ${innerValue | selectProperty:textProperty}
+        </label>
+
+        <div styles.select-custom__selected-option__caret>
             <div class="caret"></div>
         </div>
     </div>
 
     <ul if.bind="!nativeMode"
+        styles.select-custom__options
+        show.bind="expanded"
+        id.one-time="'ux-select-' + id + '-options'"
         ref="ulElement"
-        matcher.bind="matcher"
-        class="custom-select__items ${collapsed ? 'custom-select__items--collapsed' : ''}">
 
-        <template repeat.for="option of innerOptions">
-            <ux-option  html.bind="itemTemplateHTML"
-                        native-mode.bind="nativeMode"
-                        click.trigger="select(option)">
-            </ux-option>
-        </template>
+        role="listbox">
+
+        <ux-option  repeat.for="option of innerOptions"
+                    option.bind="option"
+                    id.one-time="'ux-select-' + id + '-option-' + $index"
+                    selected.bind="index === $index"
+                    click.delegate="select(option)"
+
+                    role="option">
+        </ux-option>
     </ul>
 
     <div ref="itemTemplate" show.bind=false>
-        <slot>
-            <li class="custom-select__item">
-                \${option & selectFrom:option:textProperty}
-            </li>
-        </slot>
+        <slot></slot>
     </div>
 </template>
